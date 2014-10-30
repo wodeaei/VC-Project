@@ -17,7 +17,7 @@
 
 
 CShowDesktopDlg::CShowDesktopDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CShowDesktopDlg::IDD, pParent)
+: CDialog(CShowDesktopDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -51,7 +51,7 @@ BOOL CShowDesktopDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-    SupportDropFiles();
+	SupportDropFiles();
 	InitList(m_listAllFile);
 	m_WndShadow.Create(GetSafeHwnd());
 	m_WndShadow.SetSize(8);
@@ -147,17 +147,17 @@ void CShowDesktopDlg::OnDropFiles(HDROP hDropInfo)
 
 BOOL CShowDesktopDlg::ShellLinkInfo(CString strFilePath,DESKTOP_FILE_INFO &fileInfo)
 {
-    ShellLink shellLink;
+	ShellLink shellLink;
 	if (shellLink.Load(strFilePath.GetBuffer()))
 	{
-      if(shellLink.TargetPathExists())
-	  {
-         fileInfo.strFilePath = shellLink.GetTargetPath();
-		 fileInfo.strTitle = shellLink.GetDescription();
-		 fileInfo.strParam = shellLink.GetArguments();
-		 return TRUE;
-	  }
-	  return FALSE;
+		if(shellLink.TargetPathExists())
+		{
+			fileInfo.strFilePath = shellLink.GetTargetPath();
+			fileInfo.strTitle = shellLink.GetDescription();
+			fileInfo.strParam = shellLink.GetArguments();
+			return TRUE;
+		}
+		return FALSE;
 	}
 	return FALSE;
 }
@@ -172,7 +172,7 @@ BOOL CShowDesktopDlg::AddFileInfo(CString strFilePath)
 	}else
 	{
 		newFileInfo.strFilePath = strFilePath;
-		
+
 	}
 
 	if (bRet)
@@ -182,7 +182,7 @@ BOOL CShowDesktopDlg::AddFileInfo(CString strFilePath)
 			newFileInfo.strTitle = PathFindFileName(strFilePath);
 			newFileInfo.strTitle = newFileInfo.strTitle.Left(newFileInfo.strTitle.ReverseFind(_T('.')));
 		}
-		
+
 		m_vctDesktopFile.push_back(newFileInfo);
 	}
 	return bRet;
@@ -341,7 +341,11 @@ void CShowDesktopDlg::Relayout()
 		rect.DeflateRect(-1,nTopAreaHeight - 1,0,nNewsAreaHeight);
 		m_listAllFile.MoveWindow(rect);
 		rectNews.top = rectNews.bottom - nNewsAreaHeight;
-		m_NewsDlg.MoveWindow(rectNews);
+		if(m_NewsDlg.GetSafeHwnd())
+		{
+			m_NewsDlg.MoveWindow(rectNews);
+		}
+
 	}
 }
 
@@ -354,8 +358,8 @@ void CShowDesktopDlg::OnMouseMove(UINT nFlags, CPoint point)
 	if (rect.PtInRect(point))
 	{
 		ReleaseCapture();   
-	    SendMessage(WM_NCLBUTTONDOWN,   HTCAPTION,   0);
+		SendMessage(WM_NCLBUTTONDOWN,   HTCAPTION,   0);
 	}
-	
+
 	CDialog::OnMouseMove(nFlags, point);
 }

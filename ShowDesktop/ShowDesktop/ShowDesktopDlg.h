@@ -8,9 +8,9 @@
 #include "WndShadow/WndShadow.h"
 #include "NewsDlg.h"
 const int nTopAreaHeight = 50;
-const int nNewsAreaHeight = 280;
-const int nWindowWidth = 320;
-const int nWindowHeight = 600;
+const int nNewsAreaHeight = 250;
+const int nWindowWidth = 300;
+const int nWindowHeight = 650;
 typedef struct DESKTOP_FILE_INFO{
 	CString strTitle;
 	CString strFilePath;
