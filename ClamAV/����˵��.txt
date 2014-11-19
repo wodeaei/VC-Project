@@ -1,0 +1,17 @@
+使用说明：
+需要下载OpenSSL源码（http://slproweb.com/products/Win32OpenSSL.html 或者 GitHub：https://github.com/wodeaei/Tools.git）安装至C盘根目录，结构：
+C:\OpenSSL-Win32
+               +bin
+               +exp
+               +include
+                +openssl
+               +lib
+               
+当使用新的clamav源码的时候，需要从GitHub下载项目源码（git://github.com/vrtadmin/clamav-devel）,用下载源码替换clamav-devel中源码即可
+下载的源码中可能提示缺少version.h，将项目文件夹下该文件拷贝至“\libclamav”目录下即可
+更改common.rc中引用路径
+#include "../libclamav/version.h"
+改为
+#include "../../libclamav/version.h"
+
+重命名libclam\nsis目录下bzlib.c为nsis_bzlib.c，否则会提示链接错误“LNK 2019 无法解析的外部符号”
