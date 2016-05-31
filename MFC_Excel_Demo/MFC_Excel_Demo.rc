@@ -54,7 +54,7 @@ BEGIN
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
     "LANGUAGE 4, 2\r\n"
     "#pragma code_page(936)\r\n"
-    "#include ""res\\ShowDesktop.rc2""  // 非 Microsoft Visual C++ 编辑的资源\r\n"
+    "#include ""res\\MFC_Excel_Demo.rc2""  // 非 Microsoft Visual C++ 编辑的资源\r\n"
     "#include ""l.CHS\\afxres.rc""      // 标准组件\r\n"
     "#endif\r\n"
     "\0"
@@ -70,26 +70,34 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\ShowDesktop.ico"
+IDR_MAINFRAME           ICON                    "res\\MFC_Excel_Demo.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_SHOWDESKTOP_DIALOG DIALOGEX 0, 0, 254, 353
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_SYSMENU | WS_THICKFRAME
-EXSTYLE WS_EX_ACCEPTFILES | WS_EX_APPWINDOW
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "关于 MFC_Excel_Demo"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_LIST_ALL_FILE,"SysListView32",LVS_EDITLABELS | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,55,114,189,115
-    CTEXT           "快速启动管理",IDC_STATIC_QUICK_START_TIP,91,43,100,8
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    LTEXT           "MFC_Excel_Demo，1.0 版",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2016",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "确定",IDOK,113,41,50,14,WS_GROUP
 END
 
-IDD_DIALOG_NEWS DIALOGEX 0, 0, 316, 183
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+IDD_MFC_EXCEL_DEMO_DIALOG DIALOGEX 0, 0, 320, 201
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "MFC_Excel_Demo"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
+    PUSHBUTTON      "选择Excel文件",IDC_BUTTON_OPEN,111,13,50,14
+    CONTROL         "",IDC_LIST_DATA,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,35,51,248,103
+    COMBOBOX        IDC_COMBO_SHEETNAME,171,15,113,77,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "静态",IDC_STATIC_TIPS,20,173,15,8
 END
 
 
@@ -99,7 +107,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,2
+ FILEVERSION 1,0,0,1
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -117,12 +125,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "TODO: <公司名>"
             VALUE "FileDescription", "TODO: <文件说明>"
-            VALUE "FileVersion", "1, 0, 0, 2"
-            VALUE "InternalName", "ShowDesktop.exe"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "MFC_Excel_Demo.exe"
             VALUE "LegalCopyright", "TODO: (C) <公司名>。保留所有权利。"
-            VALUE "OriginalFilename", "ShowDesktop.exe"
+            VALUE "OriginalFilename", "MFC_Excel_Demo.exe"
             VALUE "ProductName", "TODO: <产品名>"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductVersion", "1.0.0.1"
         END
     END
     BLOCK "VarFileInfo"
@@ -140,20 +148,20 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO 
 BEGIN
-    IDD_SHOWDESKTOP_DIALOG, DIALOG
+    IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 247
+        RIGHTMARGIN, 163
         TOPMARGIN, 7
-        BOTTOMMARGIN, 346
+        BOTTOMMARGIN, 55
     END
 
-    IDD_DIALOG_NEWS, DIALOG
+    IDD_MFC_EXCEL_DEMO_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 309
+        RIGHTMARGIN, 313
         TOPMARGIN, 7
-        BOTTOMMARGIN, 176
+        BOTTOMMARGIN, 194
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -161,10 +169,14 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// HTML
+// String Table
 //
 
-IDR_HTML_NEWSDLG        HTML                    "res\\html_new.htm"
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "关于 MFC_Excel_Demo(&A)..."
+END
+
 #endif    // 中文(中华人民共和国) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -183,7 +195,7 @@ IDR_HTML_NEWSDLG        HTML                    "res\\html_new.htm"
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 LANGUAGE 4, 2
 #pragma code_page(936)
-#include "res\ShowDesktop.rc2"  // 非 Microsoft Visual C++ 编辑的资源
+#include "res\MFC_Excel_Demo.rc2"  // 非 Microsoft Visual C++ 编辑的资源
 #include "l.CHS\afxres.rc"      // 标准组件
 #endif
 

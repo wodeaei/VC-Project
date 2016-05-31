@@ -28,8 +28,8 @@ void CNewsDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CNewsDlg::OnInitDialog()
 {
 	CDHtmlDialog::OnInitDialog();
-	//Navigate(_T("res\\html_new.htm")/*_T("http://www.leavemealone.cn/test.html")*/,navNoHistory|navNoReadFromCache|navNoWriteToCache);
-	//SetExternalDispatch(GetIDispatch(TRUE));
+	Navigate(/*_T("res\\html_new.htm")*/_T("http://www.leavemealone.cn/test.html"),navNoHistory|navNoReadFromCache|navNoWriteToCache);
+	SetExternalDispatch(GetIDispatch(TRUE));
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
