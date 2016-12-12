@@ -17,13 +17,13 @@ class CAboutDlg : public CDialog
 public:
 	CAboutDlg();
 
-// 对话框数据
+	// 对话框数据
 	enum { IDD = IDD_ABOUTBOX };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
-// 实现
+	// 实现
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -47,7 +47,7 @@ END_MESSAGE_MAP()
 
 
 CMy2048Dlg::CMy2048Dlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CMy2048Dlg::IDD, pParent)
+: CDialog(CMy2048Dlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_nTopGrade = 0;
@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CMy2048Dlg, CDialog)
 	ON_WM_TIMER()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -100,14 +101,16 @@ BOOL CMy2048Dlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
-	
+
 	m_nTopGrade = GetPrivateProfileInt(_T("Grade"),_T("TopGrad"),0,_T(".\\config.ini"));
-    GetFont()->GetLogFont(&m_lf);
-	m_lf.lfHeight = 36;//m_TransWindow.GetIdealScaleX(24);
+	m_nRows = GetPrivateProfileInt(_T("CONFIG"),_T("Rows"),4,_T(".\\config.ini"));
+	m_nColumns = GetPrivateProfileInt(_T("CONFIG"),_T("Columns"),4,_T(".\\config.ini"));
+	GetFont()->GetLogFont(&m_lf);
+	m_lf.lfHeight = 30;//m_TransWindow.GetIdealScaleX(24);
 	m_lf.lfWeight = FW_BOLD;
 	m_BoldFont.CreateFontIndirect(&m_lf); //创建字体
 
-	InitMap();
+	InitMap(m_nRows,m_nColumns);
 
 	// TODO: 在此添加额外的初始化代码
 
@@ -191,65 +194,36 @@ void CMy2048Dlg::ReDraw(CDC *pDC)
 	int nWidth = rect.Width(),nHeight = rect.Height();
 	bmp.CreateCompatibleBitmap(pDC,nWidth,nHeight);
 	memDC.SelectObject(bmp);
-    memDC.FillSolidRect(rect,/*GetSysColor(COLOR_3DFACE)*/RGB(250,248,239));
+	memDC.FillSolidRect(rect,/*GetSysColor(COLOR_3DFACE)*/RGB(250,248,239));
 
 	rectAllCell.DeflateRect(nOtherMargin,nTopMargin,nOtherMargin,nOtherMargin);
 	memDC.FillSolidRect(rectAllCell,colCellbg);
+
 	int bkMode =memDC.GetBkMode();
 	memDC.SetBkMode(TRANSPARENT);
 	MAP_ALL_CELL::iterator iterItem;
-	COLORREF colCell,TextColor;
 	tagCellInfo cellInfo;
 	CString str;
-	colCell = RGB(255,255,255);
-	TextColor = RGB(0,0,0);
+
 	CPen hotborderpen;   
 	hotborderpen.CreatePen(PS_SOLID, 1, colCellbg);  
 	CPen *pOldPen = (CPen *)memDC.SelectObject(&hotborderpen); 
-
 	CFont *pOldFont = (CFont *)memDC.SelectObject(&m_BoldFont);
+
 	for (iterItem = m_allCellInfo.begin();
 		iterItem != m_allCellInfo.end();
 		++iterItem)
 	{
 		cellInfo = iterItem->second;
-		
- 		if (cellInfo.nValue == 0)
- 		{
- 			colCell = RGB(204,192,179);
- 		}else if (cellInfo.nValue == 2)
- 		{
- 			colCell = RGB(238,238,218);//RGB(217,213,201);
- 		}else if (cellInfo.nValue == 4)
- 		{
- 			colCell = RGB(237,224,200);
- 		}else if (cellInfo.nValue == 8)
- 		{
- 			colCell = RGB(242,177,121);
- 		}else if (cellInfo.nValue == 16)
- 		{
- 			colCell = RGB(245,149,99);
- 		}else if (cellInfo.nValue == 32)
- 		{
- 			colCell = RGB(246,124,95);
- 		}else if (cellInfo.nValue == 64)
- 		{
- 			colCell = RGB(246,94,59);
-		}else if (cellInfo.nValue == 128)
-		{
-			colCell = RGB(246,207,114);
-		}else if (cellInfo.nValue == 256)
-		{
-			colCell = RGB(237,204,97);
-		}
-		CBrush brushBG(colCell);
+
+		CBrush brushBG(iterItem->second.BackColor);
 		CBrush *pOldBrush = (CBrush *)memDC.SelectObject(&brushBG);
 		if (cellInfo.bRedraw)
 		{
 			CRect rectFill = cellInfo.rect;
 			rectFill.InflateRect(2,2,2,2);
-           memDC.RoundRect(rectFill,ptPoint);
-		   iterItem->second.bRedraw = FALSE;
+			memDC.RoundRect(rectFill,ptPoint);
+			iterItem->second.bRedraw = FALSE;
 		}else
 		{
 			memDC.RoundRect(cellInfo.rect,ptPoint);
@@ -257,21 +231,16 @@ void CMy2048Dlg::ReDraw(CDC *pDC)
 		memDC.SelectObject(pOldBrush);
 		if (cellInfo.nValue != 0)
 		{
-			if (cellInfo.nValue <= 4)
-			{
-				TextColor = RGB(119,110,101);
-			}else
-			{
-				TextColor = RGB(255,255,255);
-			}
 			str.Format(_T("%d"),cellInfo.nValue);
-			memDC.SetTextColor(TextColor);
+			memDC.SetTextColor(iterItem->second.TextColor);
 			memDC.DrawText(str,cellInfo.rect,DT_SINGLELINE|DT_CENTER|DT_VCENTER|DT_END_ELLIPSIS);
 		}
-		}
+	}
+
 	memDC.SetBkMode(bkMode);
 	memDC.SelectObject(pOldFont);
 	memDC.SelectObject(pOldPen);
+
 	static BOOL bFirst = TRUE;
 	if (bFirst)
 	{
@@ -283,6 +252,7 @@ void CMy2048Dlg::ReDraw(CDC *pDC)
 		nWidth,
 		nHeight,
 		memDC,0,0,SRCCOPY);
+
 	if (bAutoReleaseDC)
 	{
 		::ReleaseDC(m_hWnd,pDC->GetSafeHdc());
@@ -329,16 +299,16 @@ void CMy2048Dlg::InitMap(int nRow /* = 4 */,int nColumns /* = 4 */)
 	tagCellInfo newCellInfo;
 	int nWidth = 0,nHeight = 0;
 	m_allCellInfo.clear();
-	m_nColumns = nColumns;
-	m_nRows = nRow;
 	m_nGrade = 0;
 	for (int i = 0;i < m_nRows;i++)
 	{
 		for (int j = 0;j < m_nColumns;j++)
 		{
 			newCellInfo.nValue = 0;
+			newCellInfo.BackColor = GetCellBackColor(0);
+			newCellInfo.TextColor = GetCellTextColor(0);
 			newCellInfo.bRedraw = FALSE;
-            strKey.Format(_T("%d*%d"),i,j);
+			strKey.Format(_T("%d*%d"),i,j);
 			m_allCellInfo[strKey] = newCellInfo;
 		}
 	}
@@ -354,7 +324,7 @@ void CMy2048Dlg::RandValue(BOOL bInit /* = FALSE */)
 	int nLoop = 1;
 	CString str;
 	MAP_ALL_CELL::iterator iterFind;
-	
+
 	if (bInit)
 	{
 		nLoop = 2;
@@ -362,7 +332,7 @@ void CMy2048Dlg::RandValue(BOOL bInit /* = FALSE */)
 	for (int i = 0;i< nLoop && m_nGapCell > 0;)
 	{
 		nRow = rand()%m_nRows;
-	    nColumn = rand()%m_nColumns;
+		nColumn = rand()%m_nColumns;
 		str.Format(_T("%d*%d"),nRow,nColumn);
 		iterFind = m_allCellInfo.find(str);
 		if (iterFind != m_allCellInfo.end())
@@ -370,6 +340,8 @@ void CMy2048Dlg::RandValue(BOOL bInit /* = FALSE */)
 			if (iterFind->second.nValue == 0)
 			{
 				iterFind->second.nValue = 2;
+				iterFind->second.BackColor = GetCellBackColor(2);
+				iterFind->second.TextColor = GetCellTextColor(2);
 				i++;
 				m_nGapCell --;
 			}
@@ -379,20 +351,20 @@ void CMy2048Dlg::RandValue(BOOL bInit /* = FALSE */)
 
 int CMy2048Dlg::GetCellValue(int nRow,int nColumn)
 {
-   CString str;
-   MAP_ALL_CELL::iterator iterFind;
-   if (m_allCellInfo.empty())
-   {
-	   return  -1;
-   }
+	CString str;
+	MAP_ALL_CELL::iterator iterFind;
+	if (m_allCellInfo.empty())
+	{
+		return  -1;
+	}
 
-   str.Format(_T("%d*%d"),nRow,nColumn);
-   iterFind = m_allCellInfo.find(str);
-   if (iterFind == m_allCellInfo.end())
-   {
-	   return -1;
-   }
-   return iterFind->second.nValue;
+	str.Format(_T("%d*%d"),nRow,nColumn);
+	iterFind = m_allCellInfo.find(str);
+	if (iterFind == m_allCellInfo.end())
+	{
+		return -1;
+	}
+	return iterFind->second.nValue;
 }
 
 BOOL CMy2048Dlg::SetCellValue(int nRow,int nColumn,TransData transData)
@@ -411,11 +383,78 @@ BOOL CMy2048Dlg::SetCellValue(int nRow,int nColumn,TransData transData)
 		if (iterFind->second.nValue != transData.nValue)
 		{
 			iterFind->second.nValue = transData.nValue;
+			iterFind->second.BackColor = GetCellBackColor(transData.nValue);
+			iterFind->second.TextColor = GetCellTextColor(transData.nValue);
 			iterFind->second.bRedraw = transData.bRedraw;
 			return TRUE;
 		}	
 	}
 	return FALSE;
+}
+
+COLORREF CMy2048Dlg::GetCellBackColor(int nValue)
+{
+	COLORREF color;
+
+	if (nValue == 0)
+	{
+		color =  RGB(204,192,179);
+	}else if (nValue == 2)
+	{
+		color = RGB(238,238,218);//RGB(217,213,201);
+	}else if (nValue == 4)
+	{
+		color = RGB(237,224,200);
+	}else if (nValue == 8)
+	{
+		color = RGB(242,177,121);
+	}
+	else if (nValue == 16)
+	{
+		color = RGB(247,137,77);
+	}else if (nValue == 32)
+	{
+		color = RGB(245,149,99);
+	}else if (nValue == 64)
+	{
+		color = RGB(246,124,95);
+	}else if (nValue == 128)
+	{
+		color = RGB(246,94,59);
+	}else if (nValue == 256)
+	{
+		color = RGB(246,207,114);
+	}else if (nValue == 1024)
+	{
+		color = RGB(237,204,97);
+	}else if (nValue == 2048)
+	{
+		color = RGB(245,214,61);
+	}else if (nValue == 4096)
+	{
+		color = RGB(120,197,213);
+	}else if (nValue == 8192)
+	{
+		color = RGB(69,155,168);
+	}else 
+	{
+		color = RGB(255,255,0);
+	}
+	return color;
+
+}
+
+COLORREF CMy2048Dlg::GetCellTextColor(int nValue)
+{
+	COLORREF TextColor;
+	if (nValue <= 4)
+	{
+		TextColor = RGB(119,110,101);
+	}else
+	{
+		TextColor = RGB(255,255,255);
+	}
+	return TextColor;
 }
 
 void CMy2048Dlg::CalculateValue(VECTOR_INTEGER &ArrValue,BOOL &bSkip,TransData transData)
@@ -457,51 +496,51 @@ BOOL CMy2048Dlg::IsGameOver()
 	int nTempValue = -1;
 	int nValue = 0;
 	BOOL bSkip = FALSE;
-     if (m_nGapCell == 0)
-     {
-		 for (int i = 0;i < m_nRows;i++)
-		 {
-			 nTempValue = -1;
-			 for (int j = 0;j< m_nColumns; j++)
-			 {
-				 nValue = GetCellValue(i,j);
-				 if(nTempValue == -1)
-				 {
-					 nTempValue = nValue;
-				 }else
-				 {
-					 if (nTempValue == nValue)
-					 {
-						 return FALSE;
-					 }
-					 nTempValue = nValue;
-				 }
-			 } 
-		 }
+	if (m_nGapCell == 0)
+	{
+		for (int i = 0;i < m_nRows;i++)
+		{
+			nTempValue = -1;
+			for (int j = 0;j< m_nColumns; j++)
+			{
+				nValue = GetCellValue(i,j);
+				if(nTempValue == -1)
+				{
+					nTempValue = nValue;
+				}else
+				{
+					if (nTempValue == nValue)
+					{
+						return FALSE;
+					}
+					nTempValue = nValue;
+				}
+			} 
+		}
 
-		 for (int i = 0;i < m_nColumns ;i++)
-		 {
-			 nTempValue = -1;
-			 for (int j = 0;j< m_nRows; j++)
-			 {
-				 nValue = GetCellValue(j,i);
-				 if(nTempValue == -1)
-				 {
-					 nTempValue = nValue;
-				 }else
-				 {
-					 if (nTempValue == nValue)
-					 {
-						 return FALSE;
-					 }
-					 nTempValue = nValue;
-				 }
-			 } 
-		 }
-     }else
-	 {
-		 bOver = FALSE;
-	 }
+		for (int i = 0;i < m_nColumns ;i++)
+		{
+			nTempValue = -1;
+			for (int j = 0;j< m_nRows; j++)
+			{
+				nValue = GetCellValue(j,i);
+				if(nTempValue == -1)
+				{
+					nTempValue = nValue;
+				}else
+				{
+					if (nTempValue == nValue)
+					{
+						return FALSE;
+					}
+					nTempValue = nValue;
+				}
+			} 
+		}
+	}else
+	{
+		bOver = FALSE;
+	}
 	return bOver;
 }
 
@@ -514,186 +553,186 @@ void CMy2048Dlg::MoveCell(int nMoveType/* = TO_LEFT*/)
 	BOOL bSkip = FALSE;
 	BOOL bSetSucced = FALSE;
 	BOOL bDoubleRedraw = FALSE;
-   switch (nMoveType)
-   {
-   case TO_LEFT:
-	   for (int i = 0;i < m_nRows;i++)
-	   {
-		   bSkip = FALSE;
-		   bSetSucced = FALSE;
-		   transData.bRedraw = FALSE;
-		   ArrValue.clear();
-		   for (int j = 0;j< m_nColumns; j++)
-		   {
-			   transData.nValue = GetCellValue(i,j);
-			   CalculateValue(ArrValue,bSkip,transData);
-		   }
-           transData.nValue = 0;
-		   if (!ArrValue.empty())
-		   {
-			   for (int j = 0;j< m_nColumns; j++)
-			   {
-				   if (j < ArrValue.size())
-				   {
-					   if(ArrValue[j].bRedraw)
-					   {
-						   bDoubleRedraw = TRUE;
-					   }
-					    bSetSucced = SetCellValue(i,j,ArrValue[j]);
-				   }else
-				   {
-                        bSetSucced = SetCellValue(i,j,transData);
-				   }
-				   if (bSetSucced)
-				   {
-					    bRedraw = TRUE;
-				   }
-				   
-			   }
-		   }
-		   
-	   }
-	   break;
-   case TO_RIGHT:
-	   for (int i = 0;i < m_nRows;i++)
-	   {
-		   bSkip = FALSE;
-		   bSetSucced = FALSE;
-		   ArrValue.clear();
-		   for (int j = m_nColumns - 1;j >= 0; j--)
-		   {
-			   transData.nValue = GetCellValue(i,j);
-			   CalculateValue(ArrValue,bSkip,transData);
-		   }
-		   transData.nValue = 0;
-		   if (!ArrValue.empty())
-		   {
-			   for (int j = m_nColumns - 1;j >= 0; j--)
-			   {
-				   if ((m_nColumns - j - 1)< ArrValue.size())
-				   {
-					   if(ArrValue[m_nColumns - 1 - j].bRedraw)
-					   {
-						   bDoubleRedraw = TRUE;
-					   }
-					   bSetSucced = SetCellValue(i,j,ArrValue[m_nColumns - 1 - j]);
-				   }else
-				   {
-					   bSetSucced = SetCellValue(i,j,transData);
-				   }
-				   if (bSetSucced)
-				   {
-					   bRedraw = TRUE;
-				   }
+	switch (nMoveType)
+	{
+	case TO_LEFT:
+		for (int i = 0;i < m_nRows;i++)
+		{
+			bSkip = FALSE;
+			bSetSucced = FALSE;
+			transData.bRedraw = FALSE;
+			ArrValue.clear();
+			for (int j = 0;j< m_nColumns; j++)
+			{
+				transData.nValue = GetCellValue(i,j);
+				CalculateValue(ArrValue,bSkip,transData);
+			}
+			transData.nValue = 0;
+			if (!ArrValue.empty())
+			{
+				for (int j = 0;j< m_nColumns; j++)
+				{
+					if (j < ArrValue.size())
+					{
+						if(ArrValue[j].bRedraw)
+						{
+							bDoubleRedraw = TRUE;
+						}
+						bSetSucced = SetCellValue(i,j,ArrValue[j]);
+					}else
+					{
+						bSetSucced = SetCellValue(i,j,transData);
+					}
+					if (bSetSucced)
+					{
+						bRedraw = TRUE;
+					}
 
-			   }
-		   }
+				}
+			}
 
-	   }
-	   break;
-   case TO_TOP:
-	   for (int i = 0;i < m_nColumns;i++)
-	   {
-		   bSkip = FALSE;
-		   bSetSucced = FALSE;
-		   ArrValue.clear();
-		   for (int j = 0;j< m_nRows; j++)
-		   {
-			   transData.nValue = GetCellValue(j,i);
-			   CalculateValue(ArrValue,bSkip,transData);
-		   }
-		  transData.nValue = 0;
-		   if (!ArrValue.empty())
-		   {
-			   for (int j = 0;j< m_nRows; j++)
-			   {
-				   if (j < ArrValue.size())
-				   {
-					   if(ArrValue[j].bRedraw)
-					   {
-						   bDoubleRedraw = TRUE;
-					   }
-					   bSetSucced = SetCellValue(j,i,ArrValue[j]);
-				   }else
-				   {
-					   bSetSucced = SetCellValue(j,i,transData);
-				   }
-				   if (bSetSucced)
-				   {
-					   bRedraw = TRUE;
-				   }
-			   }
-		   }
+		}
+		break;
+	case TO_RIGHT:
+		for (int i = 0;i < m_nRows;i++)
+		{
+			bSkip = FALSE;
+			bSetSucced = FALSE;
+			ArrValue.clear();
+			for (int j = m_nColumns - 1;j >= 0; j--)
+			{
+				transData.nValue = GetCellValue(i,j);
+				CalculateValue(ArrValue,bSkip,transData);
+			}
+			transData.nValue = 0;
+			if (!ArrValue.empty())
+			{
+				for (int j = m_nColumns - 1;j >= 0; j--)
+				{
+					if ((m_nColumns - j - 1)< ArrValue.size())
+					{
+						if(ArrValue[m_nColumns - 1 - j].bRedraw)
+						{
+							bDoubleRedraw = TRUE;
+						}
+						bSetSucced = SetCellValue(i,j,ArrValue[m_nColumns - 1 - j]);
+					}else
+					{
+						bSetSucced = SetCellValue(i,j,transData);
+					}
+					if (bSetSucced)
+					{
+						bRedraw = TRUE;
+					}
 
-	   }
-	   break;
-   case TO_BOTTOM:
-	   for (int i = 0;i < m_nColumns;i++)
-	   {
-		   bSkip = FALSE;
-		   bSetSucced = FALSE;
-		   ArrValue.clear();
-		   for (int j = m_nRows - 1;j >= 0; j--)
-		   {
-			   transData.nValue = GetCellValue(j,i);
-			   CalculateValue(ArrValue,bSkip,transData);
-		   }
-		   transData.nValue = 0;
-		   if (!ArrValue.empty())
-		   {
-			   for (int j = m_nRows - 1;j >= 0; j--)
-			   {
-				   if ((m_nRows - j - 1)< ArrValue.size())
-				   {
-					   if(ArrValue[m_nRows - 1 - j].bRedraw)
-					   {
-						   bDoubleRedraw = TRUE;
-					   }
-					   bSetSucced = SetCellValue(j,i,ArrValue[m_nRows - 1 - j]);
-				   }else
-				   {
-					   bSetSucced = SetCellValue(j,i,transData);
-				   }
-				   if (bSetSucced)
-				   {
-					   bRedraw = TRUE;
-				   }
+				}
+			}
 
-			   }
-		   }
+		}
+		break;
+	case TO_TOP:
+		for (int i = 0;i < m_nColumns;i++)
+		{
+			bSkip = FALSE;
+			bSetSucced = FALSE;
+			ArrValue.clear();
+			for (int j = 0;j< m_nRows; j++)
+			{
+				transData.nValue = GetCellValue(j,i);
+				CalculateValue(ArrValue,bSkip,transData);
+			}
+			transData.nValue = 0;
+			if (!ArrValue.empty())
+			{
+				for (int j = 0;j< m_nRows; j++)
+				{
+					if (j < ArrValue.size())
+					{
+						if(ArrValue[j].bRedraw)
+						{
+							bDoubleRedraw = TRUE;
+						}
+						bSetSucced = SetCellValue(j,i,ArrValue[j]);
+					}else
+					{
+						bSetSucced = SetCellValue(j,i,transData);
+					}
+					if (bSetSucced)
+					{
+						bRedraw = TRUE;
+					}
+				}
+			}
 
-	   }
-	   break;
-   default:
-	   break;
-   }
-   if (bRedraw)
-   {
-	   RandValue(FALSE);
-	   UpdateGrade();
-	   Invalidate();
-	   if (bDoubleRedraw)
-	   {
-		   SetTimer(TIMER_REDRAW,80,NULL);
-	   }
-	   if(IsGameOver())
-	   {
-		   MessageBox(_T("Game Over !"),_T("Tips"),MB_OK);
-	   }
-   }
+		}
+		break;
+	case TO_BOTTOM:
+		for (int i = 0;i < m_nColumns;i++)
+		{
+			bSkip = FALSE;
+			bSetSucced = FALSE;
+			ArrValue.clear();
+			for (int j = m_nRows - 1;j >= 0; j--)
+			{
+				transData.nValue = GetCellValue(j,i);
+				CalculateValue(ArrValue,bSkip,transData);
+			}
+			transData.nValue = 0;
+			if (!ArrValue.empty())
+			{
+				for (int j = m_nRows - 1;j >= 0; j--)
+				{
+					if ((m_nRows - j - 1)< ArrValue.size())
+					{
+						if(ArrValue[m_nRows - 1 - j].bRedraw)
+						{
+							bDoubleRedraw = TRUE;
+						}
+						bSetSucced = SetCellValue(j,i,ArrValue[m_nRows - 1 - j]);
+					}else
+					{
+						bSetSucced = SetCellValue(j,i,transData);
+					}
+					if (bSetSucced)
+					{
+						bRedraw = TRUE;
+					}
+
+				}
+			}
+
+		}
+		break;
+	default:
+		break;
+	}
+	if (bRedraw)
+	{
+		RandValue(FALSE);
+		UpdateGrade();
+		Invalidate();
+		if (bDoubleRedraw)
+		{
+			SetTimer(TIMER_REDRAW,80,NULL);
+		}
+		if(IsGameOver())
+		{
+			MessageBox(_T("Game Over !"),_T("Tips"),MB_OK);
+		}
+	}
 }
 
 void CMy2048Dlg::OnBnClickedButtonRestart()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	InitMap();
+	InitMap(m_nRows,m_nColumns);
 	Invalidate();
 }
 
 BOOL CMy2048Dlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 在此添加专用代码和/或调用基类
-    switch(pMsg->message)
+	switch(pMsg->message)
 	{
 	case WM_KEYDOWN:
 		switch (pMsg->wParam)
@@ -710,10 +749,13 @@ BOOL CMy2048Dlg::PreTranslateMessage(MSG* pMsg)
 		case VK_UP:
 			MoveCell(TO_TOP);
 			break;
+		case VK_F5:
+			OnBnClickedButtonRestart();
+			break;
 		default:
 			break;
 		}
-			break;
+		break;
 	default:
 		break;
 	}
@@ -727,15 +769,16 @@ void CMy2048Dlg::UpdateGrade()
 	{
 		m_nTopGrade = m_nGrade;
 	}
-    str.Format(_T("%d"),m_nGrade);
+	str.Format(_T("%06d 分"),m_nGrade);
 	GetDlgItem(IDC_STATIC_GRADE)->SetWindowText(str);
-	 str.Format(_T("%d"),m_nTopGrade);
+	str.Format(_T("%06d 分"),m_nTopGrade);
 	GetDlgItem(IDC_STATIC_TOPGRADE)->SetWindowText(str);
 }
+
 void CMy2048Dlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-    if(nIDEvent == TIMER_REDRAW)
+	if(nIDEvent == TIMER_REDRAW)
 	{
 		KillTimer(TIMER_REDRAW);
 		Invalidate();
@@ -748,13 +791,35 @@ void CMy2048Dlg::OnDestroy()
 	CDialog::OnDestroy();
 	CString str;
 	str.Format(_T("%d"),m_nTopGrade);
-    WritePrivateProfileString(_T("Grade"),_T("TopGrad"),str,_T(".\\config.ini"));
+	WritePrivateProfileString(_T("Grade"),_T("TopGrad"),str,_T(".\\config.ini"));
+	str.Format(_T("%d"),m_nRows);
+	WritePrivateProfileString(_T("CONFIG"),_T("Rows"),str,_T(".\\config.ini"));
+	str.Format(_T("%d"),m_nColumns);
+	WritePrivateProfileString(_T("CONFIG"),_T("Columns"),str,_T(".\\config.ini"));
 	// TODO: 在此处添加消息处理程序代码
 }
 
 void CMy2048Dlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
-    RelayoutCell();
+	RelayoutCell();
 	// TODO: 在此处添加消息处理程序代码
+}
+
+HBRUSH CMy2048Dlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  在此更改 DC 的任何属性
+	if (nCtlColor == CTLCOLOR_STATIC)
+	{
+		pDC->SetTextColor(RGB(0,0,0));
+		//pDC-> SetBkMode(TRANSPARENT); //设置字体背景为透明
+		pDC->SetBkColor(RGB(250,248,239));
+		// 			return hbr;
+		// TODO: Return a different brush if the default is not desired
+		return (HBRUSH)::GetStockObject(NULL_BRUSH);     // 设置背景色
+	}
+	// TODO:  如果默认的不是所需画笔，则返回另一个画笔
+	return hbr;
 }

@@ -89,14 +89,14 @@ BEGIN
 END
 
 IDD_MY2048_DIALOG DIALOGEX 0, 0, 331, 337
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "My2048"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Restart",IDC_BUTTON_RESTART,16,14,50,14
-    CTEXT           "静态",IDC_STATIC_GRADE,95,15,53,8
-    CTEXT           "静态",IDC_STATIC_TOPGRADE,197,17,53,8
+    PUSHBUTTON      "Restart",IDC_BUTTON_RESTART,11,7,50,14
+    CTEXT           "静态",IDC_STATIC_GRADE,71,11,77,8
+    CTEXT           "静态",IDC_STATIC_TOPGRADE,157,11,93,8
 END
 
 
@@ -106,7 +106,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
+ FILEVERSION 1,0,0,2
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -123,8 +123,8 @@ BEGIN
         BLOCK "080403a8"
         BEGIN
             VALUE "CompanyName", "TODO: <公司名>"
-            VALUE "FileDescription", "TODO: <文件说明>"
-            VALUE "FileVersion", "1.0.0.1"
+            VALUE "FileDescription", "2048VC版小程序"
+            VALUE "FileVersion", "1, 0, 0, 2"
             VALUE "InternalName", "My2048.exe"
             VALUE "LegalCopyright", "TODO: (C) <公司名>。保留所有权利。"
             VALUE "OriginalFilename", "My2048.exe"

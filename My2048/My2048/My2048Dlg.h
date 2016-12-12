@@ -18,6 +18,8 @@ typedef std::vector<TransData>VECTOR_INTEGER;
 typedef struct CellInfo{
 	int nValue;
 	CRect rect;
+	COLORREF TextColor;
+	COLORREF BackColor;
 	BOOL bRedraw;
 }tagCellInfo,*PtagCellInfo;
 typedef std::map<CString,tagCellInfo> MAP_ALL_CELL;
@@ -67,6 +69,8 @@ protected:
 	void MoveCell(int nMoveType = TO_LEFT);
     BOOL IsGameOver();
 	void UpdateGrade();
+	COLORREF GetCellBackColor(int nValue);
+	COLORREF GetCellTextColor(int nValue);
 	int  m_nGapCell;
 	UINT m_nGrade;
 	UINT m_nTopGrade;
@@ -78,4 +82,5 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
